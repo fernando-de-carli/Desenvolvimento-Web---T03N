@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario</title>
+</head>
+
+<body>
+
+    <h1>Pagina de cadastro</h1>
+
+    <form action="">
+        <fieldset>
+            <legend>Crie sua conta</legend>
+
+            <p>
+                <label for="nome">Nome:</label> <br>
+                <input type="text" name="name" id="name" required>
+            </p>
+
+            <p>
+                <label for="email">E-mail:</label> <br>
+                <input type="email" name="gmail" id="gmail" required>
+            </p>
+
+            <p>
+                <label for="Senha">Senha (Minimo 8 caracters):</label> <br>
+                <input type="password" name="senha" id="senha" minlength="8" required>
+            </p>
+
+            <p><strong>Gêneros:</strong></p>
+            <input type="radio" id="feminino" name="genero" value="Feminino">
+            <label for="feminino">Feminino</label><br>
+
+            <input type="radio" id="Masculino" name="genero" value="Masculino">
+            <label for="genero">Masculino</label><br>
+
+            <input type="radio" id="genero" name="Outros" value="Outros">
+            <label for="outro">Outros</label>
+
+            <p>
+                <input type="checkbox" name="termos" id="termos" required>
+                <label for="termos">Li e aceito os termos de serviços.</label>
+            </p>
+
+        </fieldset>
+        <p>
+
+            <input type="submit" value="cadastrar">
+            <input type="submit" value="Limpar">
+        </p>
+    </form>
+</body>
+
+</html>
