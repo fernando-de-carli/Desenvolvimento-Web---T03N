@@ -1,0 +1,11 @@
+li {
+    padding: 10px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+li:hover {
+    background: #fee;
+    color: red;
+}
