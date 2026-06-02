@@ -1,0 +1,11 @@
+[build]
+  base = "segundobi/atv1"
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Redirecionamento de todas as rotas de API para as funções do Netlify
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
