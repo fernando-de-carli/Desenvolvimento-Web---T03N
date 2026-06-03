@@ -1,11 +1,16 @@
 [build]
-  base = "segundobi/atv1"
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
-# Redirecionamento de todas as rotas de API para as funções do Netlify
+# Redirecionamento da API (que faremos no próximo guia)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
+  status = 200
+
+# Redirecionamento obrigatório para o React/Vite funcionar
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200
