@@ -22,6 +22,10 @@ import "../styles/pricing.css";
 
 export default function Home() {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState<{ type: "success" | "error" | null; text: string }>({ type: null, text: "" });
 
     useEffect(() => {
         const html = document.querySelector("html");
@@ -29,6 +33,34 @@ export default function Home() {
             html.style.overflow = showMobileMenu ? "hidden" : "auto";
         }
     }, [showMobileMenu]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus({ type: null, text: "" });
+
+        try {
+            const response = await fetch("/api/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, message }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error ?? "Erro ao enviar a mensagem.");
+            }
+
+            setStatus({ type: "success", text: "Mensagem enviada com sucesso! Responderemos em breve." });
+            setEmail("");
+            setMessage("");
+        } catch (error: any) {
+            setStatus({ type: "error", text: error.message ?? "Falha ao enviar. Tente novamente mais tarde." });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <>
@@ -201,7 +233,6 @@ export default function Home() {
                 </header>
 
                 <section className="even-columns gap-1.5">
-                    {/* Cartão 1: Básico */}
                     <div className="pricing-card">
                         <span className="plan">
                             <h3>Amostra de Corte</h3>
@@ -224,7 +255,6 @@ export default function Home() {
                         </span>
                     </div>
 
-                    {/* Cartão 2: Premium (Destaque) */}
                     <div className="pricing-card premium">
                         <span className="bonus">
                             <p>FRETE GRÁTIS</p>
@@ -253,7 +283,6 @@ export default function Home() {
                         </span>
                     </div>
 
-                    {/* Cartão 3: Empresarial (Opcional) */}
                     <div className="pricing-card">
                         <span className="plan">
                             <h3>Empresarial</h3>
@@ -279,6 +308,50 @@ export default function Home() {
                         </span>
                     </div>
                 </section>
+            </section>
+
+            {}
+            <section id="contact" className="container" style={{ paddingBlock: "4rem" }}>
+                <header style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+                    <h2>Orçamentos e Projetos</h2>
+                    <p style={{ textAlign: "center" }}>Tem uma ideia de cortador, stencil ou marcador personalizado? Envie sua mensagem e desenvolvemos para você!</p>
+                </header>
+
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "500px", margin: "0 auto", width: "100%" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                        <label htmlFor="email" style={{ fontWeight: "bold" }}>Seu E-mail:</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required 
+                            placeholder="exemplo@gmail.com"
+                            style={{ padding: "0.8rem", borderRadius: "0.5rem", border: "1px solid var(--primary-color)", width: "100%" }}
+                        />
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                        <label htmlFor="message" style={{ fontWeight: "bold" }}>Sua Mensagem (Descreva o projeto):</label>
+                        <textarea 
+                            id="message" 
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            required 
+                            placeholder="Olá! Preciso de um cortador personalizado com a logo da minha marca de doces..."
+                            rows={5}
+                            style={{ padding: "0.8rem", borderRadius: "0.5rem", border: "1px solid var(--primary-color)", width: "100%", resize: "vertical" }}
+                        />
+                    </div>
+
+                    <Button text={loading ? "Enviando..." : "Enviar Solicitação"} />
+
+                    {status.text && (
+                        <p style={{ color: status.type === "success" ? "#4CAF50" : "#F44336", textAlign: "center", fontWeight: "bold", marginTop: "0.5rem" }}>
+                            {status.text}
+                        </p>
+                    )}
+                </form>
             </section>
         </>
     )
