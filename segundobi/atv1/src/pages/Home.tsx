@@ -1,4 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Logo from "../assets/confeitei.svg";
 import Menu from "../assets/menu.svg";
 import Close from "../assets/close.svg";
@@ -25,7 +29,11 @@ export default function Home() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState<{ type: "success" | "error" | null; text: string }>({ type: null, text: "" });
+    
+    const [isChallengeCompleted, setChallengeCompleted] = useState(false);
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+    const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "";
 
     useEffect(() => {
         const html = document.querySelector("html");
@@ -34,10 +42,23 @@ export default function Home() {
         }
     }, [showMobileMenu]);
 
+    function handleCompleteChallenge(token: string | null) {
+        if (!token) {
+            setChallengeCompleted(false);
+            return;
+        }
+        setChallengeCompleted(true);
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!isChallengeCompleted) {
+            toast.warning("Por favor, confirme que você não é um robô!");
+            return;
+        }
+
         setLoading(true);
-        setStatus({ type: null, text: "" });
 
         try {
             const response = await fetch("/api/send-email", {
@@ -52,11 +73,15 @@ export default function Home() {
                 throw new Error(data.error ?? "Erro ao enviar a mensagem.");
             }
 
-            setStatus({ type: "success", text: "Mensagem enviada com sucesso! Responderemos em breve." });
+            toast.success("Mensagem enviada com sucesso! Responderemos em breve.");
+            
             setEmail("");
             setMessage("");
+            setChallengeCompleted(false);
+            recaptchaRef.current?.reset();
+
         } catch (error: any) {
-            setStatus({ type: "error", text: error.message ?? "Falha ao enviar. Tente novamente mais tarde." });
+            toast.error(error.message ?? "Falha ao enviar. Tente novamente mais tarde.");
         } finally {
             setLoading(false);
         }
@@ -64,6 +89,9 @@ export default function Home() {
 
     return (
         <>
+            {}
+            <ToastContainer position="bottom-right" />
+
             <header className="bg-mobile">
                 <nav className="container flex items-center justify-between py-sm">
                     <img src={Logo} alt="Logo Confeitei Academy" width={220} height={80} />
@@ -182,7 +210,7 @@ export default function Home() {
                         <TestimonialCard 
                             image={Profile1}
                             text="Os cortadores em 3D mudaram totalmente a agilidade dos meus biscoitos decorados. O corte vem super limpo, sem rebarbas. Excelente acabamento!"
-                            name="Enzo Silva"
+                            name="Carlos Costa"
                             role="Young Creator & Modelador 3D"
                             rating={5}
                         />
@@ -196,29 +224,7 @@ export default function Home() {
                         <TestimonialCard 
                             image={Profile3}
                             text="Os marcadores de acrílico personalizados com a identidade da minha marca valorizaram demais os meus doces finos. Meus clientes adoraram os detalhes!"
-                            name="Carlos Costa"
-                            role="Cake Designer & Palestrante"
-                            rating={4}
-                        />
-
-                        <TestimonialCard 
-                            image={Profile1}
-                            text="Os cortadores em 3D mudaram totalmente a agilidade dos meus biscoitos decorados. O corte vem super limpo, sem rebarbas. Excelente acabamento!"
                             name="Enzo Silva"
-                            role="Young Creator & Modelador 3D"
-                            rating={5}
-                        />
-                        <TestimonialCard 
-                            image={Profile2}
-                            text="Encomendei stencils e ferramentas sob medida para uma coleção exclusiva de bolos estruturados. O suporte na modelagem foi impecável e preciso."
-                            name="Rafael Rocha"
-                            role="Chef Confeiteira e Proprietário"
-                            rating={5}
-                        />
-                        <TestimonialCard 
-                            image={Profile3}
-                            text="Os marcadores de acrílico personalizados com a identidade da minha marca valorizaram demais os meus doces finos. Meus clientes adoraram os detalhes!"
-                            name="Carlos Costa"
                             role="Cake Designer & Palestrante"
                             rating={4}
                         />
@@ -310,7 +316,6 @@ export default function Home() {
                 </section>
             </section>
 
-            {}
             <section id="contact" className="container" style={{ paddingBlock: "4rem" }}>
                 <header style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
                     <h2>Orçamentos e Projetos</h2>
@@ -344,13 +349,18 @@ export default function Home() {
                         />
                     </div>
 
-                    <Button text={loading ? "Enviando..." : "Enviar Solicitação"} />
-
-                    {status.text && (
-                        <p style={{ color: status.type === "success" ? "#4CAF50" : "#F44336", textAlign: "center", fontWeight: "bold", marginTop: "0.5rem" }}>
-                            {status.text}
-                        </p>
+                    {}
+                    {siteKey && (
+                        <div style={{ display: "flex", justifyContent: "center" }}>
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={siteKey}
+                                onChange={handleCompleteChallenge}
+                            />
+                        </div>
                     )}
+
+                    <Button text={loading ? "Enviando..." : "Enviar Solicitação"} />
                 </form>
             </section>
         </>

@@ -1,5 +1,5 @@
 #testimonials {
-  height: 100vh;
+  height: auto;
   background: var(--secondary-color);
   display: flex;
   flex-direction: column;
